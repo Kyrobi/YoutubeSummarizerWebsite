@@ -43,21 +43,7 @@ public class ProxiedYoutubeClient {
             String youtubeURL = "https://www.youtube.com/watch?v=" + videoID;
             String proxyUrl = "http://" + proxyUsername + ":" + proxyPassword + "@" + proxyHost + ":" + proxyPort;
 
-            // Quick metadata call to get the video title
-            ProcessBuilder titlePb = new ProcessBuilder(
-                    ytdlpPath.toString(),
-                    "--skip-download",
-                    "--print", "title",
-                    "--proxy", proxyUrl,
-                    "--impersonate", "chrome",
-                    youtubeURL
-            );
-            Process titleProcess = titlePb.start();
-            String videoTitle = new String(titleProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim();
-            titleProcess.waitFor();
-            System.out.println("[VIDEO] " + videoTitle + " (" + videoID + ")");
-
-            // Run the binary with the flags passed in
+            // One call: --print title goes to stdout, subtitles go to .srt file
             ProcessBuilder pb = new ProcessBuilder(
                     ytdlpPath.toString(),
                     "--write-auto-subs",
@@ -66,31 +52,30 @@ public class ProxiedYoutubeClient {
                     "--sub-lang", "en",
                     "--proxy", proxyUrl,
                     "--impersonate", "chrome",
-                    // Tells it where to output the transcript file.
-                    // In this case, to the temp directory
-                    // we specified
+                    "--print", "title",
                     "-o", tempDir.resolve("%(id)s.%(ext)s").toString(),
                     youtubeURL
             );
 
-            // Merge the error output of the process to the
-            // stdout (so you can see in the console)
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
 
-            // The output is now captured into the string. Used for debugging.
-            // Note: This does not contain the transcript. That will be fetched
-            // later in the code.
+            // First line of stdout is the title, rest are yt-dlp log messages
             String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
             int exitCode = process.waitFor();
 
-            // Any exist code that is not 0 is an error (usually)
+            // Any exit code that is not 0 is an error (usually)
             if(exitCode != 0){
                 Files.deleteIfExists(tempDir);
                 throw new RuntimeException("yt-dlp failed: " + output);
             }
+
+            // Split title from log lines
+            String[] lines = output.split("\n", 2);
+            String videoTitle = lines[0].trim();
+            System.out.println("[VIDEO] " + videoTitle + " (" + videoID + ")");
 
             /*
             --------------------------------------------
