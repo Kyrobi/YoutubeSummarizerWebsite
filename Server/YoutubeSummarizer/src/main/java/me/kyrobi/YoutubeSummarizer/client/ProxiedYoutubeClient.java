@@ -43,6 +43,20 @@ public class ProxiedYoutubeClient {
             String youtubeURL = "https://www.youtube.com/watch?v=" + videoID;
             String proxyUrl = "http://" + proxyUsername + ":" + proxyPassword + "@" + proxyHost + ":" + proxyPort;
 
+            // Quick metadata call to get the video title
+            ProcessBuilder titlePb = new ProcessBuilder(
+                    ytdlpPath.toString(),
+                    "--skip-download",
+                    "--print", "title",
+                    "--proxy", proxyUrl,
+                    "--impersonate", "chrome",
+                    youtubeURL
+            );
+            Process titleProcess = titlePb.start();
+            String videoTitle = new String(titleProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim();
+            titleProcess.waitFor();
+            System.out.println("[VIDEO] " + videoTitle + " (" + videoID + ")");
+
             // Run the binary with the flags passed in
             ProcessBuilder pb = new ProcessBuilder(
                     ytdlpPath.toString(),

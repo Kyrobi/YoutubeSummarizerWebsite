@@ -37,6 +37,9 @@ public class SummarizeEndpointController {
             ip = request.getRemoteAddr();
         }
 
+        System.out.println("[REQUEST] IP=" + ip + " | Raw input: \"" + youtubeLink + "\" | size=" + size);
+        System.out.println("[REQUEST] YouTube link: " + youtubeLink);
+
         if(!turnstileService.validateToken(turnstileToken, ip)){
             return ResponseEntity.status(403).body(Map.of("error", "Verification failed"));
         }
