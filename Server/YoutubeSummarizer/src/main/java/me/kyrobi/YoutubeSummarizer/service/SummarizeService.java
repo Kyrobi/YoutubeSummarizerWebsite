@@ -89,7 +89,6 @@ public class SummarizeService {
     }
 
     private String fetchTranscript(String videoId) {
-
         try {
             YoutubeClient youtubeClient = new ProxiedYoutubeClient(proxyHost, proxyPort, proxyUsername, proxyPassword);
             YoutubeTranscriptApi api = TranscriptApiFactory.createWithClient(youtubeClient);

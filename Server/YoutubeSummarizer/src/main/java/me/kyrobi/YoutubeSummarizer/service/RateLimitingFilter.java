@@ -54,9 +54,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static Bucket createBucket() {
         return Bucket.builder()
-            .addLimit(Bandwidth.classic(4, Refill.greedy(4, Duration.ofMinutes(1)))) // 4 requests a minute
-            .addLimit(Bandwidth.classic(30, Refill.greedy(30, Duration.ofDays(1)))) // 20 requests a day
-            .addLimit(Bandwidth.classic(100, Refill.greedy(100, Duration.ofDays(7)))) // 100 requests a week
+            .addLimit(Bandwidth.classic(4, Refill.greedy(10, Duration.ofMinutes(1)))) // 10 requests a minute
+            .addLimit(Bandwidth.classic(30, Refill.greedy(40, Duration.ofDays(1)))) // 40 requests a day
+            .addLimit(Bandwidth.classic(100, Refill.greedy(180, Duration.ofDays(7)))) // 180 requests a week
             .build();
     }
 

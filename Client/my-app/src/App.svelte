@@ -11,8 +11,10 @@
       // const response = await fetch(
       //   `http://localhost:8080/summarize?youtubeLink=${encodeURIComponent(youtubeLink)}&size=${encodeURIComponent(size)}`
       // )
+      const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
+
       const response = await fetch(
-        `https://videosummary-api.kyrobi.net/summarize?youtubeLink=${encodeURIComponent(youtubeLink)}&size=${encodeURIComponent(size)}`
+        `https://videosummary-api.kyrobi.net/summarize?youtubeLink=${encodeURIComponent(youtubeLink)}&size=${encodeURIComponent(size)}&cf-turnstile-response=${turnstileToken}`
       )
 
 
@@ -21,6 +23,7 @@
 
     } finally {
       loading = false
+      turnstile.reset();
     }
   
   }
@@ -39,6 +42,7 @@
     <button onclick={() => submit("M")} title="Just the essentials. The main takeaways and critical points only.">🍗 10pc Nuggets<br>(Key Points)</button>
     <button onclick={() => submit("S")} title="The single most important takeaway in a sentence or two.">🍟 Medium Fries<br>(Couple Sentences)</button>
   </div>
+  <div class="cf-turnstile" data-sitekey="0x4AAAAAADgHuIudsL_XYbya"></div>
 
   {#if loading}
 

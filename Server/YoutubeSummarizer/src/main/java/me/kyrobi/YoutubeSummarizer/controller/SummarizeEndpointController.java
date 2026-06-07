@@ -1,6 +1,9 @@
 package me.kyrobi.YoutubeSummarizer.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import me.kyrobi.YoutubeSummarizer.service.SummarizeService;
+import me.kyrobi.YoutubeSummarizer.service.TurnstileService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,25 +19,39 @@ import java.util.Map;
 public class SummarizeEndpointController {
 
     private final SummarizeService summarizeService;
+    private final TurnstileService turnstileService;
 
-    public SummarizeEndpointController(SummarizeService summarizeService) {
+    public SummarizeEndpointController(SummarizeService summarizeService, TurnstileService turnstileService) {
         this.summarizeService = summarizeService;
+        this.turnstileService = turnstileService;
     }
 
     @GetMapping("/summarize")
-    public Map<String, String> summarize(@RequestParam String youtubeLink, @RequestParam String size){
+    public ResponseEntity<Map<String, String>> summarize(
+            @RequestParam String youtubeLink,
+            @RequestParam String size,
+            @RequestParam("cf-turnstile-response") String turnstileToken,
+            HttpServletRequest request) {
+
+        String ip = request.getHeader("CF-Connecting-IP");
+        if(ip == null){
+            ip = request.getRemoteAddr();
+        }
+
+        if(!turnstileService.validateToken(turnstileToken, ip)){
+            return ResponseEntity.status(403).body(Map.of("error", "Verification failed"));
+        }
 
         if(!isValidLink(youtubeLink)){
-            return Map.of("summary", "Invalid Link!");
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid Link!"));
         }
 
         if(!isValidSize(size)){
-            return Map.of("summary", "Invalid Menu Selection!");
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid Menu Selection!"));
         }
 
         String summary = summarizeService.summarize(youtubeLink, size);
-        System.out.println(summary);
-        return Map.of("summary", summary);
+        return ResponseEntity.ok(Map.of("summary", summary));
     }
 
     private boolean isValidLink(String youtubeLink){
