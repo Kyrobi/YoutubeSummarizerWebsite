@@ -81,6 +81,9 @@ public class SummarizeService {
         }
 
         String transcript = fetchTranscript(videoId);
+        if (transcript == null) {
+            return "Something went wrong";
+        }
         String cleaned = removeUselessWords(transcript);
         return deepseek.query(systemPrompt, cleaned);
     }
@@ -98,8 +101,7 @@ public class SummarizeService {
         } catch (io.github.thoroldvix.api.TranscriptRetrievalException exception){
             System.out.println("[ERROR] Failed to fetch transcript for video " + videoId);
             System.out.println("[ERROR] Message: " + exception.getMessage());
-            exception.printStackTrace(System.out);
-            return "Error fetching transcript";
+            return null;
         }
     }
 
