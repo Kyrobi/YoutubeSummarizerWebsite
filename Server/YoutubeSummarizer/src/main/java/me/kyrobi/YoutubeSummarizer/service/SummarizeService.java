@@ -20,6 +20,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,8 @@ public class SummarizeService {
         this.proxyPassword = proxyPassword;
     }
 
+
+
     public String summarize(String youtubeLink, String size) {
         if (!isValidLink(youtubeLink)) {
             return "Invalid link!";
@@ -82,7 +85,7 @@ public class SummarizeService {
 
         String transcript = fetchTranscript(videoId);
         if (transcript == null) {
-            return "Something went wrong";
+            return "Something went wrong reading this video";
         }
         if (transcript.split("\\s+").length > 15000) {
             return "This video is lowkey too long...";
@@ -92,19 +95,15 @@ public class SummarizeService {
     }
 
     private String fetchTranscript(String videoId) {
-        try {
-            YoutubeClient youtubeClient = new ProxiedYoutubeClient(proxyHost, proxyPort, proxyUsername, proxyPassword);
-            YoutubeTranscriptApi api = TranscriptApiFactory.createWithClient(youtubeClient);
+        Optional<String> transcript = new ProxiedYoutubeClient(proxyHost, proxyPort, proxyUsername, proxyPassword).fetchTranscript(videoId);
 
-            TranscriptContent content = api.getTranscript(videoId);
-            String text = TranscriptFormatters.textFormatter().format(content);
-
-            return text;
-        } catch (io.github.thoroldvix.api.TranscriptRetrievalException exception){
-            System.out.println("[ERROR] Failed to fetch transcript for video " + videoId);
-            System.out.println("[ERROR] Message: " + exception.getMessage());
-            return null;
+        if(transcript.isEmpty()){
+            System.out.println("[ERROR] Transcript doesn't exist");
+            return "Something went wrong";
         }
+
+        String text = transcript.get();
+        return text;
     }
 
     private String removeUselessWords(String text) {
