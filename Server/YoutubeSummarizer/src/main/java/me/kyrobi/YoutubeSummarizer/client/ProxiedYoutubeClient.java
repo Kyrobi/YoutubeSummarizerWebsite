@@ -32,13 +32,8 @@ public class ProxiedYoutubeClient {
         boolean isWindow = System.getProperty("os.name").toLowerCase().contains("win");
         String binaryName = isWindow ? "yt-dlp.exe" : "yt-dlp";
 
-        Path currentDir;
         try{
-            // Get the current directory of the current running jar
-            currentDir = Paths.get(
-                    getClass().getProtectionDomain().getCodeSource().getLocation().toURI()
-            ).getParent();
-
+            Path currentDir = Paths.get(System.getProperty("user.dir"));
             Path ytdlpPath = currentDir.resolve(binaryName);
 
             // yt-dlp will run, and the write to this temp file, and then exist
@@ -111,11 +106,8 @@ public class ProxiedYoutubeClient {
 
             return Optional.of(parseSrt(srt));
 
-
-        } catch (URISyntaxException e){
-            System.out.println("Error loading jar directory.");
         } catch (IOException e){
-            System.out.println("Error opening file (tempfile?)");
+            System.out.println("Error opening file " + e.getMessage());
         } catch (InterruptedException e){
             System.out.println("yt-dlp process was interrupted");
         }

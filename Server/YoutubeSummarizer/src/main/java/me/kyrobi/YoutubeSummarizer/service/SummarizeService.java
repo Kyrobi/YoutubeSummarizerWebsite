@@ -11,6 +11,7 @@ import me.kyrobi.YoutubeSummarizer.client.ProxiedYoutubeClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -83,27 +84,31 @@ public class SummarizeService {
             return "Could not extract video ID from link!";
         }
 
-        String transcript = fetchTranscript(videoId);
-        if (transcript == null) {
-            return "Something went wrong reading this video";
+        Optional<String> transcript = fetchTranscript(videoId);
+        if (transcript.isEmpty()){
+            return "Something went wrong processing this video";
         }
-        if (transcript.split("\\s+").length > 15000) {
+
+//        System.out.println(transcript.get());
+
+        if (transcript.get().split("\\s+").length > 15000) {
             return "This video is lowkey too long...";
         }
-        String cleaned = removeUselessWords(transcript);
+        String cleaned = removeUselessWords(transcript.get());
+
         return deepseek.query(systemPrompt, cleaned);
     }
 
-    private String fetchTranscript(String videoId) {
+    private Optional<String> fetchTranscript(String videoId) {
         Optional<String> transcript = new ProxiedYoutubeClient(proxyHost, proxyPort, proxyUsername, proxyPassword).fetchTranscript(videoId);
 
         if(transcript.isEmpty()){
             System.out.println("[ERROR] Transcript doesn't exist");
-            return "Something went wrong";
+            return Optional.empty();
         }
 
         String text = transcript.get();
-        return text;
+        return Optional.of(text);
     }
 
     private String removeUselessWords(String text) {
