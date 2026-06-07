@@ -43,16 +43,14 @@ public class ProxiedYoutubeClient {
             String youtubeURL = "https://www.youtube.com/watch?v=" + videoID;
             String proxyUrl = "http://" + proxyUsername + ":" + proxyPassword + "@" + proxyHost + ":" + proxyPort;
 
-            // One call: --print title goes to stdout, subtitles go to .srt file
             ProcessBuilder pb = new ProcessBuilder(
                     ytdlpPath.toString(),
                     "--write-auto-subs",
                     "--sub-format", "srt",
                     "--skip-download",
-                    "--sub-lang", "en",
+
                     "--proxy", proxyUrl,
                     "--impersonate", "chrome",
-                    "--print", "title",
                     "-o", tempDir.resolve("%(id)s.%(ext)s").toString(),
                     youtubeURL
             );
@@ -61,21 +59,14 @@ public class ProxiedYoutubeClient {
 
             Process process = pb.start();
 
-            // First line of stdout is the title, rest are yt-dlp log messages
             String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
             int exitCode = process.waitFor();
 
-            // Any exit code that is not 0 is an error (usually)
             if(exitCode != 0){
                 Files.deleteIfExists(tempDir);
                 throw new RuntimeException("yt-dlp failed: " + output);
             }
-
-            // Split title from log lines
-            String[] lines = output.split("\n", 2);
-            String videoTitle = lines[0].trim();
-            System.out.println("[VIDEO] " + videoTitle + " (" + videoID + ")");
 
             /*
             --------------------------------------------
@@ -109,6 +100,8 @@ public class ProxiedYoutubeClient {
             System.out.println("Error opening file " + e.getMessage());
         } catch (InterruptedException e){
             System.out.println("yt-dlp process was interrupted");
+        } catch (RuntimeException e){
+            System.out.println(e.getMessage());
         }
 
         return Optional.empty();
