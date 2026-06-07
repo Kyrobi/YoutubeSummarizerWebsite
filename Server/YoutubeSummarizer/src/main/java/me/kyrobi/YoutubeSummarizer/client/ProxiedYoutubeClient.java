@@ -7,6 +7,7 @@ import okhttp3.*;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ProxiedYoutubeClient implements YoutubeClient {
 
@@ -17,6 +18,9 @@ public class ProxiedYoutubeClient implements YoutubeClient {
 
         this.httpClient = new OkHttpClient.Builder()
             .proxy(proxy)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .proxyAuthenticator((route, response) -> {
                 String credentials = Credentials.basic(username, password);
                 return response.request().newBuilder()

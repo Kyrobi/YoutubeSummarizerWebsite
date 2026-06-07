@@ -35,9 +35,9 @@
   <p>Place Your Order</p>
 
   <div class="button-row">
-    <button onclick={() => submit("L")} title="All the key points with context to understand the full picture.">🍔 Dave's Single</button>
-    <button onclick={() => submit("M")} title="Just the essentials. The main takeaways and critical points only.">🍗 10pc Nuggets</button>
-    <button onclick={() => submit("S")} title="The single most important takeaway in a sentence or two.">🍟 Medium Fries</button>
+    <button onclick={() => submit("L")} title="All the key points with context to understand the full picture.">🍔 Dave's Single<br>(Full Context)</button>
+    <button onclick={() => submit("M")} title="Just the essentials. The main takeaways and critical points only.">🍗 10pc Nuggets<br>(Key Points)</button>
+    <button onclick={() => submit("S")} title="The single most important takeaway in a sentence or two.">🍟 Medium Fries<br>(Couple Sentences)</button>
   </div>
 
   {#if loading}
