@@ -84,6 +84,9 @@ public class SummarizeService {
         if (transcript == null) {
             return "Something went wrong";
         }
+        if (transcript.split("\\s+").length > 15000) {
+            return "This video is lowkey too long...";
+        }
         String cleaned = removeUselessWords(transcript);
         return deepseek.query(systemPrompt, cleaned);
     }
