@@ -22,6 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -36,18 +39,21 @@ public class SummarizeService {
     private final String proxyUsername;
     private final String proxyPassword;
 
+    private final CacheService cacheService;
+
     private static final String[] VALID_DOMAINS = {
         "youtube.com", "www.youtube.com", "m.youtube.com",
         "youtu.be", "www.youtu.be", "music.youtube.com"
     };
 
-    private static final String L_PROMPT = "Summarize in 3-5 paragraphs or bullets (~150-250 words). Cover key points and main arguments with enough context. Include important details and implications. Skip minor examples, tangents, redundancy. Structure for easy scanning.";
+    private static final String L_PROMPT = "No intro. Start immediately with the summary. Include conclusion at the end. Summarize in 3-5 paragraphs or bullets (~150-250 words). Cover key points and main arguments with enough context. Include important details and implications. Skip minor examples, tangents, redundancy. Structure for easy scanning.";
 
-    private static final String M_PROMPT = "Summarize in 3-5 bullets or 1 short paragraph (~60-100 words). Keep only main takeaways. Minimal context per point. Omit examples, minor details, nuance. Just essential facts.";
+    private static final String M_PROMPT = "No intro or outro. Start immediately with the summary. Summarize in 3-5 bullets or 1 short paragraph (~60-100 words). Keep only main takeaways. Minimal context per point. Omit examples, minor details, nuance. Just essential facts.";
 
-    private static final String S_PROMPT = "Summarize in 1-2 sentences (20-80 words). Capture single most important takeaway or core thesis. No supporting details, examples, or background. Direct and punchy.";
+    private static final String S_PROMPT = "No intro or outro. Start immediately with the summary. Summarize in 1-2 sentences (20-80 words). Capture single most important takeaway or core thesis. No supporting details, examples, or background. Direct and punchy.";
 
     public SummarizeService(Deepseek deepseek,
+                            CacheService cacheService,
                             @Value("${proxy.host}") String proxyHost,
                             @Value("${proxy.port}") int proxyPort,
                             @Value("${proxy.username}") String proxyUsername,
@@ -59,6 +65,7 @@ public class SummarizeService {
         this.proxyPort = proxyPort;
         this.proxyUsername = proxyUsername;
         this.proxyPassword = proxyPassword;
+        this.cacheService = cacheService;
     }
 
 
@@ -84,6 +91,12 @@ public class SummarizeService {
             return "Could not extract video ID from link!";
         }
 
+        // Check to see if summary is already in cache
+        Optional<String> cachedSummary = cacheService.getSummary(videoId, size);
+        if(cachedSummary.isPresent()){
+            return cachedSummary.get();
+        }
+
         Optional<String> transcript = fetchTranscript(videoId);
         if (transcript.isEmpty()){
             return "Something went wrong processing this video";
@@ -96,7 +109,35 @@ public class SummarizeService {
         }
         String cleaned = removeUselessWords(transcript.get());
 
-        return deepseek.query(systemPrompt, cleaned);
+        try(var executor = Executors.newVirtualThreadPerTaskExecutor()){
+            var futureS = CompletableFuture.supplyAsync(() -> deepseek.query(S_PROMPT, cleaned));
+            var futureM = CompletableFuture.supplyAsync(() -> deepseek.query(M_PROMPT, cleaned));
+            var futureL = CompletableFuture.supplyAsync(() -> deepseek.query(L_PROMPT, cleaned));
+
+            futureS.thenAccept(summary -> cacheService.saveSummary(videoId, "S", summary))
+                    .exceptionally(ex -> { System.out.println("S summary fetch failed: " + ex.getMessage()); return null; });
+
+            futureM.thenAccept(summary -> cacheService.saveSummary(videoId, "M", summary))
+                    .exceptionally(ex -> { System.out.println("M summary fetch failed: " + ex.getMessage()); return null; });
+
+            futureL.thenAccept(summary -> cacheService.saveSummary(videoId, "L", summary))
+                    .exceptionally(ex -> { System.out.println("L summary fetch failed: " + ex.getMessage()); return null; });
+
+            return switch (size) {
+                case "S" -> futureS.get();
+                case "M" -> futureM.get();
+                case "L" -> futureL.get();
+                default -> "Can't summarize this :(";
+            };
+
+        } catch (ExecutionException | InterruptedException e) {
+            System.out.println(e.getMessage());
+            // When exception is thrown and caught, the threads aren't marked as interrupted.
+            // Manually mark the threads as interrupted, so in the future, if other code checks this,
+            // it'll properly show that they've been interrupted.
+            Thread.currentThread().interrupt();
+            return "Error";
+        }
     }
 
     private Optional<String> fetchTranscript(String videoId) {

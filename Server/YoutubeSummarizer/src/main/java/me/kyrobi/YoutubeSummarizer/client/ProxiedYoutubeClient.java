@@ -48,7 +48,6 @@ public class ProxiedYoutubeClient {
                     "--write-auto-subs",
                     "--sub-format", "srt",
                     "--skip-download",
-
                     "--proxy", proxyUrl,
                     "--impersonate", "chrome",
                     "-o", tempDir.resolve("%(id)s.%(ext)s").toString(),
