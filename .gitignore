@@ -75,3 +75,4 @@ web_modules/
 src/service-worker.js
 src/service-worker.d.ts
 /Server/YoutubeSummarizer/test
+/Docker
