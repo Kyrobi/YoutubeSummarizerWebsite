@@ -54,6 +54,7 @@ jobs:
               --name youtube-summarizer \
               -p 8533:8533 \
               -v /home/ubuntu/Server/Service/VideoSummarizer:/app/data \
+              -v /home/ubuntu/Server/Service/VideoSummarizer/yt-dlp:/app/yt-dlp \
               -e SPRING_CONFIG_LOCATION=file:/app/data/application.properties \
               --restart unless-stopped \
               ${{ secrets.DOCKER_USERNAME }}/youtube-summarizer:latest
