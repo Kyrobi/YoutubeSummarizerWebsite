@@ -47,14 +47,6 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/youtube-summarizer:latest
-            docker stop youtube-summarizer || true
-            docker rm youtube-summarizer || true
-            docker run -d \
-              --name youtube-summarizer \
-              -p 8533:8533 \
-              -v /home/ubuntu/Server/Service/VideoSummarizer:/app/data \
-              -v /home/ubuntu/Server/Service/VideoSummarizer/yt-dlp:/app/yt-dlp \
-              -e SPRING_CONFIG_LOCATION=file:/app/data/application.properties \
-              --restart unless-stopped \
-              ${{ secrets.DOCKER_USERNAME }}/youtube-summarizer:latest
+            cd /home/ubuntu/Server/Service/VideoSummarizer
+            docker compose pull
+            docker compose up -d

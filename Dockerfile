@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jre
 
 RUN apt-get update && \
-    apt-get install -y python3 ffmpeg curl && \
+    apt-get install -y python3 ffmpeg curl unzip && \
     rm -rf /var/lib/apt/lists/*
 
 # Need Deno to make yt-dlp work properly since it
@@ -9,11 +9,15 @@ RUN apt-get update && \
 RUN curl -fsSL https://deno.land/install.sh | sh
 ENV PATH="/root/.deno/bin:${PATH}"
 
+# Download yt-dlp
+RUN curl -L \
+    https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux \
+    -o /app/yt-dlp && \
+    chmod +x /app/yt-dlp
+
 WORKDIR /app
 
 COPY app.jar app.jar
-
-RUN ln -s /usr/local/bin/yt-dlp /app/yt-dlp
 
 EXPOSE 8533
 
