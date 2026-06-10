@@ -1,8 +1,7 @@
 FROM eclipse-temurin:21-jre
 
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip ffmpeg curl && \
-    pip3 install "yt-dlp[default,curl-cffi]" && \
+    apt-get install -y python3 ffmpeg curl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
