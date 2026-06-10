@@ -45,13 +45,21 @@ public class ProxiedYoutubeClient {
 
             ProcessBuilder pb = new ProcessBuilder(
                     ytdlpPath.toString(),
-                    "--write-auto-subs",      // auto-generated subtitles
-                    "--sleep-interval 1",
-                    "--max-sleep-interval 5",
-                    "--sub-format", "srt",
+                    "--write-auto-subs",
+                    "--sub-langs", "en.*",
                     "--skip-download",
-                    "--proxy", proxyUrl,
+
+                    "--sleep-interval", "1",
+                    "--max-sleep-interval", "5",
+                    "--retries", "10",
+                    "--retry-sleep", "exp:1:10",
+
+                    "--concurrent-fragments", "1",
                     "--impersonate", "chrome",
+                    "--extractor-args", "youtube:player_client=android",
+
+                    "--proxy", proxyUrl,
+                    
                     "-o", tempDir.resolve("%(id)s.%(ext)s").toString(),
                     youtubeURL
             );
