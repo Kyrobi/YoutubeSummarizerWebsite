@@ -50,15 +50,12 @@ public class ProxiedYoutubeClient {
                     "--sub-langs", "en.*",
                     "--skip-download",
 
-                    "--sleep-interval", "1",
-                    "--max-sleep-interval", "5",
+//                    "--sleep-interval", "1",
+//                    "--max-sleep-interval", "5",
                     "--retries", "10",
                     "--retry-sleep", "1",
 
-                    "--concurrent-fragments", "1",
                     "--impersonate", "chrome",
-                    "--extractor-args", "youtube:player_client=android",
-
                     "--proxy", proxyUrl,
 
                     "-o", tempDir.resolve("%(id)s.%(ext)s").toString(),
