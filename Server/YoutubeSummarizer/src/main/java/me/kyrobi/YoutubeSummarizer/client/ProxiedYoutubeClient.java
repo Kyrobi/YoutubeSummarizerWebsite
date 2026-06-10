@@ -45,8 +45,9 @@ public class ProxiedYoutubeClient {
 
             ProcessBuilder pb = new ProcessBuilder(
                     ytdlpPath.toString(),
-                    "--write-subs",           // manual subtitles
                     "--write-auto-subs",      // auto-generated subtitles
+                    "--sleep-interval 1",
+                    "--max-sleep-interval 5",
                     "--sub-format", "srt",
                     "--skip-download",
                     "--proxy", proxyUrl,
