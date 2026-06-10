@@ -10,3 +10,4 @@ target/
 *.md
 .idea
 *.iml
+Server/YoutubeSummarizer/target/
