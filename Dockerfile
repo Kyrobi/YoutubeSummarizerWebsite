@@ -11,6 +11,8 @@ WORKDIR /app
 # Note the path change: Server/YoutubeSummarizer/target/
 COPY app.jar app.jar
 
+RUN ln -s /usr/local/bin/yt-dlp /app/yt-dlp
+
 EXPOSE 8533
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
