@@ -48,5 +48,6 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /home/ubuntu/Server/Service/VideoSummarizer
+            docker compose down
             docker compose pull
             docker compose up -d
