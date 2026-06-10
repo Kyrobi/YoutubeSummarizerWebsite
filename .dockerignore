@@ -1,0 +1,12 @@
+application.properties
+yt-dlp_x86.exe
+cache.db
+docker-compose.yml
+Dockerfile
+.dockerignore
+.git
+.github
+target/
+*.md
+.idea
+*.iml
