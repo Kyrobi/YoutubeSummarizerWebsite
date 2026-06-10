@@ -46,11 +46,11 @@ public class SummarizeService {
         "youtu.be", "www.youtu.be", "music.youtube.com"
     };
 
-    private static final String L_PROMPT = "No intro. Start immediately with the summary. Include conclusion at the end. Summarize in 3-5 paragraphs or bullets (~150-250 words). Cover key points and main arguments with enough context. Include important details and implications. Skip minor examples, tangents, redundancy. Structure for easy scanning.";
+    private static final String L_PROMPT = "No intro. Start immediately with the summary. If transcript is not English, translate to English. Include conclusion at the end. Summarize in 3-5 paragraphs or bullets (~150-250 words). Cover key points and main arguments with enough context. Include important details and implications. Skip minor examples, tangents, redundancy. Structure for easy scanning.";
 
-    private static final String M_PROMPT = "No intro or outro. Start immediately with the summary. Summarize in 3-5 bullets or 1 short paragraph (~60-100 words). Keep only main takeaways. Minimal context per point. Omit examples, minor details, nuance. Just essential facts.";
+    private static final String M_PROMPT = "No intro or outro. Start immediately with the summary. If transcript is not English, translate to English. Summarize in 3-5 bullets or 1 short paragraph (~60-100 words). Keep only main takeaways. Minimal context per point. Omit examples, minor details, nuance. Just essential facts.";
 
-    private static final String S_PROMPT = "No intro or outro. Start immediately with the summary. Summarize in 1-2 sentences (20-80 words). Capture single most important takeaway or core thesis. No supporting details, examples, or background. Direct and punchy.";
+    private static final String S_PROMPT = "No intro or outro. Start immediately with the summary. If transcript is not English, translate to English. Summarize in 1-2 sentences (20-80 words). Capture single most important takeaway or core thesis. No supporting details, examples, or background. Direct and punchy.";
 
     public SummarizeService(Deepseek deepseek,
                             CacheService cacheService,
