@@ -9,7 +9,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Note the path change: Server/YoutubeSummarizer/target/
-COPY Server/YoutubeSummarizer/target/YoutubeSummarizer-0.0.1-SNAPSHOT.jar app.jar
+COPY app.jar app.jar
 
 EXPOSE 8533
 

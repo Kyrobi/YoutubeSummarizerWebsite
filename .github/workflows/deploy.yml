@@ -21,6 +21,7 @@ jobs:
         run: |
           cd Server/YoutubeSummarizer
           mvn clean package -DskipTests
+          cp target/YoutubeSummarizer-0.0.1-SNAPSHOT.jar ../../app.jar
         
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
