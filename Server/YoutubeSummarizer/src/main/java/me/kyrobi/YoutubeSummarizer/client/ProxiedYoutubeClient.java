@@ -47,7 +47,7 @@ public class ProxiedYoutubeClient {
                     ytdlpPath.toString(),
                     "--write-auto-subs",
                     "--write-subs",
-                    "--sub-langs", "all",
+                    "--sub-langs", "en.*",
                     "--skip-download",
 
                     "--sleep-interval", "1",
