@@ -99,7 +99,7 @@ public class SummarizeService {
 
         Optional<String> transcript = fetchTranscript(videoId);
         if (transcript.isEmpty()){
-            return "Something went wrong processing this video";
+            return "This video doesn't have usable English captions. Summary is unavailable.";
         }
 
 //        System.out.println(transcript.get());
