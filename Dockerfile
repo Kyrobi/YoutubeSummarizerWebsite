@@ -9,13 +9,13 @@ RUN apt-get update && \
 RUN curl -fsSL https://deno.land/install.sh | sh
 ENV PATH="/root/.deno/bin:${PATH}"
 
+WORKDIR /app
+
 # Download yt-dlp
 RUN curl -L \
     https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux \
     -o /app/yt-dlp && \
     chmod +x /app/yt-dlp
-
-WORKDIR /app
 
 COPY app.jar app.jar
 
