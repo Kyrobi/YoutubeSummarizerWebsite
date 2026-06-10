@@ -1,6 +1,6 @@
 services:
   app:
-    image: yourusername/youtube-summarizer:latest
+    image: kyrobi/youtube-summarizer:latest
     container_name: youtube-summarizer
     pull_policy: always
     ports:
