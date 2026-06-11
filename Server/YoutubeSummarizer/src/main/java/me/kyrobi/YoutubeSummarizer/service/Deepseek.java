@@ -40,6 +40,7 @@ public class Deepseek {
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
                 .build();
 
+            System.out.println("[DEEPSEEK] Sending request to DeepSeek API...");
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {

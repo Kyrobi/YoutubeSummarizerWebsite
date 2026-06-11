@@ -141,6 +141,7 @@ public class SummarizeService {
     }
 
     private Optional<String> fetchTranscript(String videoId) {
+        System.out.println("[FETCH] Starting transcript fetch for video: " + videoId);
         Optional<String> transcript = new ProxiedYoutubeClient(proxyHost, proxyPort, proxyUsername, proxyPassword).fetchTranscript(videoId);
 
         if(transcript.isEmpty()){
@@ -148,6 +149,7 @@ public class SummarizeService {
             return Optional.empty();
         }
 
+        System.out.println("[FETCH] Transcript fetched successfully");
         String text = transcript.get();
         return Optional.of(text);
     }
