@@ -45,14 +45,11 @@ public class ProxiedYoutubeClient {
 
             ProcessBuilder pb = new ProcessBuilder(
                     ytdlpPath.toString(),
+                    "--write-subs",
                     "--write-auto-subs",
-//                    "--write-subs",
-//                    "--sub-langs", "en.*",
+
                     "--sub-format", "srt",
                     "--skip-download",
-
-//                    "--retries", "10",
-//                    "--retry-sleep", "1",
 
                     "--impersonate", "chrome",
                     "--proxy", proxyUrl,
