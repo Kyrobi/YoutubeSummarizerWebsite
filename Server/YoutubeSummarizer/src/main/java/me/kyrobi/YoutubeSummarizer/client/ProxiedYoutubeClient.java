@@ -51,8 +51,8 @@ public class ProxiedYoutubeClient {
                     "--sub-format", "srt",
                     "--skip-download",
 
-                    "--retries", "10",
-                    "--retry-sleep", "1",
+//                    "--retries", "10",
+//                    "--retry-sleep", "1",
 
                     "--impersonate", "chrome",
                     "--proxy", proxyUrl,
