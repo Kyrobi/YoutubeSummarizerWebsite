@@ -1,13 +1,14 @@
 package me.kyrobi.YoutubeSummarizer.client;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class ProxiedYoutubeClient {
@@ -48,7 +49,7 @@ public class ProxiedYoutubeClient {
 //                    "--write-subs",
                     "--write-auto-subs",
 
-                    "--sub-format", "srt",
+                    "--sub-format", "srv1",
                     "--skip-download",
 
                     "--impersonate", "chrome",
@@ -78,26 +79,35 @@ public class ProxiedYoutubeClient {
              */
             // We read from the tempfile location since
             // yt-dlp writes to the temp folder
-            List<Path> srtFiles;
+            List<Path> subtitleFiles;
             // Go through the directory and find any .srt files
             // that were created. Put in try for auto cleanup
-            try(Stream<Path> files = Files.list(tempDir)){
-                srtFiles = files.filter(f -> f.toString().endsWith(".srt")).toList();
+            try (Stream<Path> files = Files.list(tempDir)){
+                subtitleFiles = files
+                        .filter(Files::isRegularFile)
+                        .filter(p -> {
+                            String name = p.getFileName().toString();
+                            return name.endsWith(".srv1") || name.endsWith(".xml") || name.endsWith(".vtt");
+                        })
+                        .toList();
             }
 
-            if(srtFiles.isEmpty()){
+            if(subtitleFiles.isEmpty()){
                 throw new RuntimeException("No subtitles found for video " + videoID);
             }
 
-            String srt = Files.readString(srtFiles.getFirst());
-            // Delete all the files inside the directory if exists
-            for(Path f: Files.list(tempDir).toList()){
-                Files.deleteIfExists(f);
+            String srt = Files.readString(subtitleFiles.getFirst());
+            // Delete all the files inside the directory if exists.
+            // Use try to close file handles
+            try (Stream<Path> files = Files.list(tempDir)){
+                for (Path f : files.toList()) {
+                    Files.deleteIfExists(f);
+                }
             }
             // A folder needs to be emptied before it can be deleted
             Files.deleteIfExists(tempDir);
 
-            return Optional.of(parseSrt(srt));
+            return Optional.of(parseSrv1(srt));
 
         } catch (IOException e){
             System.out.println("Error opening file " + e.getMessage());
@@ -110,14 +120,38 @@ public class ProxiedYoutubeClient {
         return Optional.empty();
     }
 
-    private String parseSrt(String srt) {
-        return srt
-                .replaceAll("(?m)^\\d+\\s*$", "")                    // index numbers
-                .replaceAll("(?m)^\\d{2}:\\d{2}:\\d{2}[,.]\\d{3}\\s*-->\\s*\\d{2}:\\d{2}:\\d{2}[,.]\\d{3}\\s*$", "") // timestamps
-                .replaceAll("<[^>]+>", "")                            // HTML tags
-                .replaceAll("(?m)^[\\s]*$", "")                      // blank lines
-                .replaceAll("\\s+", " ")                             // collapse spaces
-                .trim();
+    private String parseSrv1(String xml) {
+//        return srt
+//                .replaceAll("(?m)^\\d+\\s*$", "")                    // index numbers
+//                .replaceAll("(?m)^\\d{2}:\\d{2}:\\d{2}[,.]\\d{3}\\s*-->\\s*\\d{2}:\\d{2}:\\d{2}[,.]\\d{3}\\s*$", "") // timestamps
+//                .replaceAll("<[^>]+>", "")                            // HTML tags
+//                .replaceAll("(?m)^[\\s]*$", "")                      // blank lines
+//                .replaceAll("\\s+", " ")                             // collapse spaces
+//                .trim();
+
+        Pattern pattern = Pattern.compile(
+                "<text[^>]*>(.*?)</text>",
+                Pattern.DOTALL
+        );
+
+        Matcher matcher = pattern.matcher(xml);
+
+        StringBuilder sb = new StringBuilder();
+
+        while(matcher.find()) {
+            String text = matcher.group(1);
+
+            text = text
+                    .replace("&amp;", "&")
+                    .replace("&lt;", "<")
+                    .replace("&gt;", ">")
+                    .replace("&#39;", "'")
+                    .replace("&quot;", "\"");
+
+            sb.append(text).append(' ');
+        }
+
+        return sb.toString().trim();
     }
 
 }
