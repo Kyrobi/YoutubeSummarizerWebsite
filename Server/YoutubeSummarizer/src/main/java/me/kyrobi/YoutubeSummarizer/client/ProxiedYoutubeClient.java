@@ -53,7 +53,7 @@ public class ProxiedYoutubeClient {
                     "--skip-download",
 
                     "--impersonate", "chrome",
-                    "--proxy", proxyUrl,
+//                    "--proxy", proxyUrl,
 
                     "-o", tempDir.resolve("%(id)s.%(ext)s").toString(),
                     youtubeURL
