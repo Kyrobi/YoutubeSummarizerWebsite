@@ -76,3 +76,10 @@ src/service-worker.js
 src/service-worker.d.ts
 /Server/YoutubeSummarizer/test
 /Docker
+
+# Local SQLite cache and build output
+*.db
+*.db-journal
+Server/YoutubeSummarizer/cache.db
+Server/YoutubeSummarizer/target/
+
